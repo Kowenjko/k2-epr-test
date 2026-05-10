@@ -21,18 +21,15 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
     )
 
-    app_name: str = "FastAPI Blog"
-    debug: bool = True
+    app_name: str = "K2 Service API"
+    app_description: str = "Модуль обліку замовлень для K2 ERP-системи"
+    debug: bool = False
 
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
 
     database_url: str
     frontend_url: str = "http://localhost:8000"
-
-    media_dir: str = "media"
-
-    max_upload_size_bytes: int = 5 * 1024 * 1024
 
 
 settings = Settings()
