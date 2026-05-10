@@ -1,9 +1,8 @@
 from typing import Annotated
-from fastapi import APIRouter, Query, UploadFile, status, Depends
+from fastapi import APIRouter, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.config import settings
 
 from .schemas import ClientCreate, ClientResponse
 from .services import ClientService
