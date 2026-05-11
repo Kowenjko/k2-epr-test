@@ -1,9 +1,3 @@
-/**
- * useApi — typed $fetch wrapper around the FastAPI backend.
- * Demonstrates TypeScript-first composable design with full type safety.
- */
-import type { Client, ClientCreate, Product, ProductCreate, Order, OrderCreate, ApiError } from '~/types'
-
 export function useApi() {
   const config = useRuntimeConfig()
   const base = config.public.apiBaseUrl as string
