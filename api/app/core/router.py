@@ -3,10 +3,13 @@ from app.core.config import settings
 
 from app.modules.client.router import router as client_router
 from app.modules.product.router import router as product_router
+from app.modules.order.router import router as order_router
+
 from app.modules.system.router import router as system_router
 
 router = APIRouter(prefix=settings.api.prefix)
 
 router.include_router(prefix=settings.api.clients, router=client_router)
 router.include_router(prefix=settings.api.products, router=product_router)
+router.include_router(prefix=settings.api.orders, router=order_router)
 router.include_router(system_router)

@@ -20,7 +20,7 @@ async def create_product(
 
 
 @router.get("/", response_model=list[ProductResponse])
-async def Products(
+async def get_products(
     session: Annotated[AsyncSession, Depends(get_db)],
 ):
     service = ProductService(session)
