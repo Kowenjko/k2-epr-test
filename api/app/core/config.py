@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List, Union
 
 
 class RunConfig(BaseModel):
@@ -24,6 +25,12 @@ class Settings(BaseSettings):
     app_name: str = "K2 Service API"
     app_description: str = "Модуль обліку замовлень для K2 ERP-системи"
     debug: bool = False
+
+    cors_origins: Union[List[str], str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://0.0.0.0:3000",
+    ]
 
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
