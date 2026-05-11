@@ -15,7 +15,7 @@ class ClientService:
         existing_client = await self.repository.get_by_email(client_data.email)
         if existing_client:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_409_CONFLICT,
                 detail="Client with this email already exists",
             )
         new_client = await self.repository.create(client_data)
