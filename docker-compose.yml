@@ -17,6 +17,26 @@ services:
       timeout: 3s
       retries: 3
 
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+    container_name: k2-api
+    environment:
+      DATABASE_URL: postgresql+asyncpg://k2epr:k2epr@pg:5432/k2epr              
+    depends_on:
+      pg:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api:/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/api/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
 volumes:
   pgdata:
 

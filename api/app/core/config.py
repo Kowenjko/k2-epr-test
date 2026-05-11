@@ -29,7 +29,6 @@ class Settings(BaseSettings):
     api: ApiPrefix = ApiPrefix()
 
     database_url: str
-    frontend_url: str = "http://localhost:8000"
 
 
 settings = Settings()
