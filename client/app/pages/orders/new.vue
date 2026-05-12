@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ShoppingCart, Plus, Minus, Trash2, CheckCircle } from 'lucide-vue-next'
 
-const cart = useCart()
 const router = useRouter()
 
 const loading = ref(false)
@@ -14,18 +13,18 @@ const selectedClientId = ref<number | null>(null)
 const notes = ref('')
 const clientError = ref('')
 
+const cartStore = useCartStore()
 const errorsStore = useErrorsStore()
+
 const { data: clients } = await useAPI<IClient[]>(CLIENTS)
 const { data: products } = useAPI<Product[]>(PRODUCTS)
 
-const productInCart = (product: Product) => cart.items.value.find((item: any) => item.product.id === product.id)
-
 const toggleProduct = (product: Product) => {
-  const inCart = productInCart(product)
+  const inCart = cartStore.productInCart(product)
   if (inCart) {
-    cart.remove(product.id)
+    cartStore.remove(product.id)
   } else {
-    cart.add(product, 1)
+    cartStore.add(product, 1)
   }
 }
 
@@ -35,7 +34,7 @@ const submit = async () => {
     clientError.value = 'Оберіть клієнта'
     return
   }
-  if (cart.isEmpty.value) {
+  if (cartStore.isEmpty) {
     errorsStore.setErrors('Додайте хоча б один товар')
     return
   }
@@ -45,11 +44,11 @@ const submit = async () => {
     const order = await orderAPI.create({
       client_id: selectedClientId.value,
       notes: notes.value.trim() || undefined,
-      items: cart.toOrderItems.value,
+      items: cartStore.toOrderItems,
     })
     createdOrderId.value = order.id
     done.value = true
-    cart.clear()
+    cartStore.clear()
   } catch (e) {
   } finally {
     submitting.value = false
@@ -117,7 +116,7 @@ const submit = async () => {
                 >2</span
               >
               Товари
-              <span class="ml-1 text-xs font-normal text-muted-foreground"> ({{ cart.count.value }} обрано) </span>
+              <span class="ml-1 text-xs font-normal text-muted-foreground"> ({{ cartStore.count }} обрано) </span>
             </h2>
 
             <div v-if="products && products.length === 0" class="py-8 text-center text-sm text-muted-foreground">
@@ -133,7 +132,7 @@ const submit = async () => {
                 :key="product.id"
                 class="relative cursor-pointer rounded-md border p-3 transition-all hover:shadow-sm"
                 :class="
-                  productInCart(product)
+                  cartStore.productInCart(product)
                     ? 'border-primary bg-primary/5 ring-1 ring-primary'
                     : 'border-border hover:border-muted-foreground'
                 "
@@ -148,23 +147,23 @@ const submit = async () => {
                 </div>
 
                 <!-- Quantity control (shown when in cart) -->
-                <div v-if="productInCart(product)" class="mt-2 flex items-center gap-1" @click.stop>
+                <div v-if="cartStore.productInCart(product)" class="mt-2 flex items-center gap-1" @click.stop>
                   <Button
                     variant="outline"
                     size="icon"
                     class="size-6"
-                    @click="cart.setQty(product.id, (productInCart(product)?.quantity ?? 1) - 1)"
+                    @click="cartStore.setQty(product.id, (cartStore.productInCart(product)?.quantity ?? 1) - 1)"
                   >
                     <Minus class="size-3" />
                   </Button>
                   <span class="w-6 text-center text-sm font-semibold">
-                    {{ productInCart(product)?.quantity }}
+                    {{ cartStore.productInCart(product)?.quantity }}
                   </span>
                   <Button
                     variant="outline"
                     size="icon"
                     class="size-6"
-                    @click="cart.setQty(product.id, (productInCart(product)?.quantity ?? 1) + 1)"
+                    @click="cartStore.setQty(product.id, (cartStore.productInCart(product)?.quantity ?? 1) + 1)"
                   >
                     <Plus class="size-3" />
                   </Button>
@@ -194,13 +193,13 @@ const submit = async () => {
               <h2 class="text-sm font-semibold">Кошик</h2>
             </div>
 
-            <div v-if="cart.isEmpty.value" class="py-6 text-center text-sm text-muted-foreground">
+            <div v-if="cartStore.isEmpty" class="py-6 text-center text-sm text-muted-foreground">
               Натисніть на товар, щоб додати
             </div>
 
             <div v-else class="space-y-2">
               <div
-                v-for="item in cart.items.value"
+                v-for="item in cartStore.items"
                 :key="item.product.id"
                 class="flex items-center justify-between gap-2 border-b py-2 last:border-0"
               >
@@ -218,7 +217,7 @@ const submit = async () => {
                     variant="ghost"
                     size="icon"
                     class="size-6 text-muted-foreground hover:text-destructive"
-                    @click="cart.remove(item.product.id)"
+                    @click="cartStore.remove(item.product.id)"
                   >
                     <Trash2 class="size-3" />
                   </Button>
@@ -227,7 +226,7 @@ const submit = async () => {
 
               <div class="flex items-center justify-between pt-3">
                 <span class="font-semibold">Разом</span>
-                <span class="text-lg font-bold">{{ formatPrice(cart.total.value) }}</span>
+                <span class="text-lg font-bold">{{ formatPrice(cartStore.total) }}</span>
               </div>
               <p class="text-xs text-muted-foreground">Сума розраховується автоматично</p>
             </div>
@@ -238,7 +237,7 @@ const submit = async () => {
 
             <Button
               class="mt-4 w-full"
-              :disabled="cart.isEmpty.value || !selectedClientId"
+              :disabled="cartStore.isEmpty || !selectedClientId"
               :loading="submitting"
               @click="submit"
             >

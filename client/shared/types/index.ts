@@ -58,7 +58,7 @@ export interface Order {
   notes: string | null
   created_at: string
   updated_at: string
-  client: Client | null
+  client: IClient | null
   items: OrderItem[]
 }
 
