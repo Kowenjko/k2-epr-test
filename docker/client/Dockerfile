@@ -2,8 +2,6 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-ENV NODE_ENV=development
-
 COPY client/package.json client/yarn.lock ./
 
 RUN yarn install --frozen-lockfile --network-timeout 100000

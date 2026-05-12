@@ -64,8 +64,12 @@ test:
 # --------------------------
 env-api:
 	@test -f api/.env || cp api/.env.example api/.env
+
 env-client:
 	@test -f client/.env || cp client/.env.example client/.env
 
-install: env-api env-client build up migrate seed-reset
+c.install:
+	docker compose run --rm --no-deps client yarn install
+
+install: env-api env-client build c.install up migrate seed-reset 
 
