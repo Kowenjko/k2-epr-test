@@ -26,7 +26,7 @@ const nav = [
           :to="item.to"
           class="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors"
           :class="
-            route.path === item.to.name
+            route.name === item.to.name
               ? 'bg-accent font-medium text-accent-foreground'
               : 'text-muted-foreground hover:bg-accent hover:text-foreground'
           "

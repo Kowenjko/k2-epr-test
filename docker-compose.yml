@@ -37,6 +37,21 @@ services:
       timeout: 3s
       retries: 5
 
+  client:
+    build:
+      context: .
+      dockerfile: docker/client/Dockerfile
+    container_name: k2-frontend
+    command: yarn dev --host 0.0.0.0    
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+   
+    depends_on:
+      api:
+        condition: service_healthy
+
 volumes:
   pgdata:
 
