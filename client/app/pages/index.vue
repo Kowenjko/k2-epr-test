@@ -95,7 +95,10 @@ watch(selectedClientId, async () => await loadOrders())
       <div v-else-if="orders && orders.length === 0" class="py-16 text-center text-muted-foreground">
         <ClipboardList class="mx-auto mb-3 size-10 opacity-30" />
         <p class="font-medium">Замовлень поки немає</p>
-        <NuxtLink to="/orders/new" class="mt-1 inline-block text-sm text-primary underline-offset-4 hover:underline">
+        <NuxtLink
+          :to="NEW_ORDERS_LINK"
+          class="mt-1 inline-block text-sm text-primary underline-offset-4 hover:underline"
+        >
           Створити перше замовлення →
         </NuxtLink>
       </div>

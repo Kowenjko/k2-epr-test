@@ -121,7 +121,7 @@ const submit = async () => {
 
             <div v-if="products && products.length === 0" class="py-8 text-center text-sm text-muted-foreground">
               Каталог порожній.
-              <NuxtLink to="/products" class="text-primary underline-offset-4 hover:underline"
+              <NuxtLink :to="PRODUCTS_LINK" class="text-primary underline-offset-4 hover:underline"
                 >Додати товари →</NuxtLink
               >
             </div>
