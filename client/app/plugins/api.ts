@@ -11,6 +11,11 @@ export default defineNuxtPlugin((nuxtApp) => {
       'Content-Type': 'application/json',
     },
 
+    async onRequest() {
+      const errorsStore = useErrorsStore()
+      errorsStore.setErrors(null)
+    },
+
     async onResponseError({ response }) {
       if (process.client) {
         const body = response._data as ApiError | undefined

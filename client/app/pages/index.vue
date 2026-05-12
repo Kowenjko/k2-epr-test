@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { Search, RefreshCw } from 'lucide-vue-next'
-import type { Order, Client, OrderStatus } from '~/types'
-import { formatPrice, formatDate, extractApiError } from '~/composables/utils'
+import { Search, RefreshCw, ClipboardList } from 'lucide-vue-next'
 
-const api = useApi()
-
-const clients = ref<Client[]>([])
 const orders = ref<Order[]>([])
 const selectedClientId = ref<number | null>(null)
 const loading = ref(false)
-const error = ref('')
 
 const statusLabels: Record<OrderStatus, string> = {
   pending: 'Очікує',
@@ -27,28 +21,26 @@ const statusVariants: Record<OrderStatus, string> = {
   cancelled: 'cancelled',
 }
 
-onMounted(async () => {
-  try {
-    clients.value = await api.clients.list()
-  } catch (e) {
-    error.value = extractApiError(e)
-  }
-})
+const errorsStore = useErrorsStore()
+const { data: clients } = useAPI<Client[]>(CLIENTS)
 
-async function loadOrders() {
+const selectedClient = computed(
+  () => clients.value?.find((client: Client) => +client.id === selectedClientId.value) ?? null,
+)
+
+const loadOrders = async () => {
   if (!selectedClientId.value) return
-  loading.value = true
-  error.value = ''
+
   try {
-    orders.value = await api.orders.byClient(selectedClientId.value)
-  } catch (e) {
-    error.value = extractApiError(e)
+    loading.value = true
+    orders.value = await orderAPI.byClient(selectedClientId.value)
+  } catch (error) {
   } finally {
     loading.value = false
   }
 }
 
-const selectedClient = computed(() => clients.value.find((c) => c.id === selectedClientId.value) ?? null)
+watch(selectedClientId, async () => await loadOrders())
 </script>
 
 <template>
@@ -64,22 +56,15 @@ const selectedClient = computed(() => clients.value.find((c) => c.id === selecte
         <div class="flex-1">
           <Label for="client-select" class="mb-1.5 block">Оберіть клієнта</Label>
 
-          <Select
-            id="client-select"
-            v-model="selectedClientId"
-            @update:model-value="
-              (v) => {
-                selectedClientId = v ? Number(v) : null
-                loadOrders()
-              }
-            "
-          >
+          <Select id="client-select" v-model="selectedClientId">
             <SelectTrigger class="client-select min-w-48">
               <SelectValue placeholder="Клієнт" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }} ({{ c.email }})</SelectItem>
+                <SelectItem v-for="client in clients" :key="client.id" :value="client.id"
+                  >{{ client?.name }} - ({{ client?.email }})</SelectItem
+                >
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -99,7 +84,7 @@ const selectedClient = computed(() => clients.value.find((c) => c.id === selecte
       </div>
     </Card>
 
-    <Alert v-if="error" variant="destructive">{{ error }}</Alert>
+    <Alert v-if="errorsStore.errors" variant="destructive" class="text-nowrap">{{ errorsStore.errors }}</Alert>
 
     <!-- Orders list -->
     <template v-if="selectedClientId">
@@ -107,7 +92,7 @@ const selectedClient = computed(() => clients.value.find((c) => c.id === selecte
         <Skeleton v-for="i in 3" :key="i" class="h-24 w-full" />
       </div>
 
-      <div v-else-if="orders.length === 0" class="py-16 text-center text-muted-foreground">
+      <div v-else-if="orders && orders.length === 0" class="py-16 text-center text-muted-foreground">
         <ClipboardList class="mx-auto mb-3 size-10 opacity-30" />
         <p class="font-medium">Замовлень поки немає</p>
         <NuxtLink to="/orders/new" class="mt-1 inline-block text-sm text-primary underline-offset-4 hover:underline">
@@ -117,7 +102,7 @@ const selectedClient = computed(() => clients.value.find((c) => c.id === selecte
 
       <div v-else class="space-y-3">
         <p class="text-sm text-muted-foreground">
-          Знайдено {{ orders.length }} замовл.
+          Знайдено {{ orders?.length }} замовл.
           <template v-if="selectedClient">
             для <strong>{{ selectedClient.name }}</strong></template
           >
@@ -127,7 +112,7 @@ const selectedClient = computed(() => clients.value.find((c) => c.id === selecte
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="space-y-1">
               <div class="flex items-center gap-2">
-                <span class="font-mono text-sm font-semibold">#{{ order.id }}</span>
+                <span class="font-mono text-sm font-semibold">id: {{ order.id }}</span>
                 <Badge :variant="statusVariants[order.status]">
                   {{ statusLabels[order.status] }}
                 </Badge>

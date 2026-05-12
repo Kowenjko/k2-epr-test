@@ -38,7 +38,7 @@ export default defineNuxtConfig({
      *
      * @default `['stores']`
      */
-    storesDirs: [],
+    storesDirs: ['./stores/**'],
   },
   shadcn: {
     /**

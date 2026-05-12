@@ -1,12 +1,12 @@
 export const orderAPI = {
   async byClient(clientId: number) {
     const { $api } = useNuxtApp()
-    return await $api<Order[]>(ORDERS + CLIENTS + `/${clientId}`)
+    return await $api<Order[]>(ORDERS + CLIENT + `${clientId}`)
   },
 
   async get(id: number) {
     const { $api } = useNuxtApp()
-    return await $api<Order>(ORDERS + `/${id}`)
+    return await $api<Order>(ORDERS + `${id}`)
   },
 
   async create(body: OrderCreate) {
