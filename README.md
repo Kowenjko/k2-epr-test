@@ -1,28 +1,8 @@
 # K2 ERP Test — Order Service
 
-Full-stack модуль для обліку клієнтів, товарів і замовлень. Проєкт складається з FastAPI бекенду, PostgreSQL бази даних і Nuxt 4 фронтенду.
+**Backend:** FastAPI · PostgreSQL · SQLAlchemy 2 (async) · Alembic · Pydantic v2 · uv  
+**Frontend:** Nuxt 4 · Pinia · Tailwind CSS · shadcn-vue · TypeScript
 
-## Стек
-
-| Частина | Технології |
-|---|---|
-| API | FastAPI, SQLAlchemy 2 async, Alembic, Pydantic v2, uv |
-| Database | PostgreSQL 16 |
-| Frontend | Nuxt 4, Vue 3, TypeScript, Pinia, Tailwind CSS 4, shadcn-vue |
-| Tests | pytest, pytest-asyncio, SQLite in-memory |
-| DevOps | Docker Compose, Dockerfile для API і client, Makefile |
-
-## Можливості
-
-- створення, перегляд і видалення клієнтів;
-- створення, перегляд і видалення товарів;
-- створення замовлення для конкретного клієнта;
-- додавання одного або кількох товарів у замовлення;
-- автоматичний розрахунок суми замовлення;
-- фіксація `unit_price` у позиції замовлення, щоб старі замовлення не залежали від майбутніх змін ціни товару;
-- перегляд замовлень за клієнтом;
-- валідація вхідних даних на бекенді через Pydantic;
-- базова обробка API-помилок на фронтенді з toast-повідомленнями.
 
 ## Структура
 
@@ -39,9 +19,9 @@ Full-stack модуль для обліку клієнтів, товарів і 
 │   ├── alembic/                 # міграції БД
 │   ├── tests/                   # pytest тести
 │   ├── run.py                   # запуск API
-│   ├── seed.py                  # demo data
+│   ├── seed.py                  # seed
 │   └── pyproject.toml
-├── client/                      # Nuxt 4 застосунок
+├── client/                      # Nuxt 4
 │   ├── app/
 │   │   ├── components/          # app та shadcn-vue компоненти
 │   │   ├── layouts/default.vue  # основний layout
@@ -92,14 +72,6 @@ http://localhost:8000/docs
 make install
 ```
 
-Ця команда:
-
-- створює `api/.env` і `client/.env`, якщо їх ще немає;
-- збирає Docker images;
-- запускає контейнери у фоні;
-- застосовує Alembic міграції;
-- очищає і заповнює базу demo-даними.
-
 Після цього застосунок доступний тут:
 
 | Сервіс | URL |
@@ -124,6 +96,7 @@ docker compose up --build
 Після першого запуску застосуй міграції і, за потреби, заповни базу:
 
 ```bash
+make c.install
 make migrate
 make seed-reset
 ```
@@ -195,63 +168,22 @@ cd api
 uv run pytest -v
 ```
 
-Покриті базові сценарії:
-
-- створення клієнта;
-- перевірка дублювання email;
-- створення товару;
-- створення замовлення з розрахунком `total_amount`;
-- помилка для неіснуючого клієнта;
-- помилка для замовлення без товарів;
-- отримання замовлень за клієнтом.
-
-## Корисні команди
-
-| Команда | Опис |
+---
+ 
+## Чому саме такий підхід
+ 
+| Рішення | Причина |
 |---|---|
-| `make install` | створити env-файли, зібрати images, підняти контейнери, виконати міграції і seed |
-| `make dev` | запустити Docker Compose з rebuild |
-| `make up` | запустити контейнери у фоні |
-| `make build` | зібрати Docker images |
-| `make down` | зупинити контейнери |
-| `make restart` | перезапустити контейнери |
-| `make logs` | дивитися логи |
-| `make ps` | статус контейнерів |
-| `make migrate` | застосувати Alembic міграції |
-| `make revision msg="..."` | створити нову autogenerate-міграцію |
-| `make downgrade` | відкотити останню міграцію |
-| `make seed` | додати demo-дані |
-| `make seed-reset` | очистити дані і заново заповнити demo-даними |
-| `make test` | запустити тести |
-| `make env-api` | створити `api/.env` з прикладу, якщо файла ще немає |
-| `make env-client` | створити `client/.env` з прикладу, якщо файла ще немає |
+| **FastAPI**  | В тестовому вказано що можна використовувати інший близький Python web framework|
+| **Alembic**  | Дозволяє контролювати міграціїї до бази даних|
+| **Pydantic**  | Використовував для валідації даних|
+| **SQLAlchemy**  |Для спрощеної роботи з базами даних|
+| **uv** замість pip | 10-100× швидше, `uv.lock` — детерміновані збірки |
+| **Nuxt 4**  | Новітня версія, `app/` директорія|
+| **Tailwind CSS**  | Стилі можна прописувати класами |
+| **shadcn-vue**  | Компоненти —  легко кастомізувати |
+| **Pinia**  | Глобальний стан менеджер для vue |
+| **TypeScript**  | Типізована мова програмування, яка дозволяє уникнути багів під час розробки |
 
-## Приклад створення замовлення
-
-```json
-{
-  "client_id": 1,
-  "notes": "Передзвонити перед доставкою",
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 2
-    },
-    {
-      "product_id": 3,
-      "quantity": 1
-    }
-  ]
-}
-```
-
-API перевіряє існування клієнта і товарів, бере поточну ціну товару, записує її в `OrderItem.unit_price`, рахує subtotal для кожної позиції і фінальний `total_amount`.
-
-## Нотатки по реалізації
-
-- API має модульну структуру: `client`, `product`, `order`, `system`.
-- Бізнес-логіка винесена в service layer, робота з БД — у repository layer.
-- Для моделей використовується SQLAlchemy ORM з async session.
-- Frontend має окремі service-файли для API-запитів: `client.services.ts`, `product.services.ts`, `order.services.ts`.
-- Кошик замовлення реалізований через Pinia store `cart.ts`.
-- Runtime API URL налаштовуються через `NUXT_API_BASE_URL` і `NUXT_API_URL_SERVER`.
+ 
+---
