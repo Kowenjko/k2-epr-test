@@ -1,4 +1,4 @@
-export interface Client {
+export interface IClient {
   id: number
   name: string
   email: string
@@ -66,7 +66,6 @@ export interface ApiError {
   detail: string | { msg: string; type: string }[]
 }
 
-/** Cart item used in the order creation flow */
 export interface CartItem {
   product: Product
   quantity: number

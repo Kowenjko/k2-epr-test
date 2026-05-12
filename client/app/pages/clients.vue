@@ -9,7 +9,7 @@ const form = reactive({ name: '', email: '', phone: '' })
 const errors = reactive({ name: '', email: '', phone: '' })
 
 const errorsStore = useErrorsStore()
-const { data: clients, pending: loading, refresh } = useAPI<Client[]>(CLIENTS)
+const { data: clients, pending: loading, refresh } = useAPI<IClient[]>(CLIENTS, { key: 'clients' })
 
 function validate(): boolean {
   errors.name = form.name.trim() ? '' : "Ім'я обов'язкове"

@@ -9,7 +9,7 @@ const form = reactive({ name: '', description: '', price: '', sku: '' })
 const errors = reactive({ name: '', price: '' })
 
 const errorsStore = useErrorsStore()
-const { data: products, pending: loading, refresh } = useAPI<Product[]>(PRODUCTS)
+const { data: products, pending: loading, refresh } = useAPI<Product[]>(PRODUCTS, { key: 'products' })
 
 function validate(): boolean {
   errors.name = form.name.trim() ? '' : "Назва обов'язкова"

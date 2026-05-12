@@ -22,10 +22,10 @@ const statusVariants: Record<OrderStatus, string> = {
 }
 
 const errorsStore = useErrorsStore()
-const { data: clients } = useAPI<Client[]>(CLIENTS)
+const { data: clients } = useAPI<IClient[]>(CLIENTS)
 
 const selectedClient = computed(
-  () => clients.value?.find((client: Client) => +client.id === selectedClientId.value) ?? null,
+  () => clients.value?.find((client: IClient) => +client.id === selectedClientId.value) ?? null,
 )
 
 const loadOrders = async () => {
@@ -112,7 +112,7 @@ watch(selectedClientId, async () => await loadOrders())
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="space-y-1">
               <div class="flex items-center gap-2">
-                <span class="font-mono text-sm font-semibold">id: {{ order.id }}</span>
+                <span class="font-mono text-sm font-semibold">ID: {{ order.id }}</span>
                 <Badge :variant="statusVariants[order.status]">
                   {{ statusLabels[order.status] }}
                 </Badge>
