@@ -3,12 +3,12 @@ import { UserPlus, Users } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
 
 const submitting = ref(false)
-const error = ref('')
 const success = ref('')
 
 const form = reactive({ name: '', email: '', phone: '' })
 const errors = reactive({ name: '', email: '', phone: '' })
 
+const errorsStore = useErrorsStore()
 const { data: clients, pending: loading, refresh } = useAPI<Client[]>(CLIENTS)
 
 function validate(): boolean {
@@ -20,7 +20,6 @@ function validate(): boolean {
 const submit = async () => {
   if (!validate()) return
   submitting.value = true
-  error.value = ''
   success.value = ''
   try {
     await clientAPI.create(form)
@@ -70,7 +69,9 @@ watch(success, () => success.value && setTimeout(() => (success.value = ''), 300
             <Input id="phone" v-model="form.phone" placeholder="+380501234567" />
           </div>
 
-          <Alert v-if="error" variant="destructive" class="text-xs text-nowrap">{{ error }}</Alert>
+          <Alert v-if="errorsStore.errors" variant="destructive" class="text-xs text-nowrap">{{
+            errorsStore.errors
+          }}</Alert>
           <Alert v-if="success" variant="success" class="text-xs text-nowrap">{{ success }}</Alert>
 
           <Button type="submit" class="w-full" :loading="submitting"> Створити клієнта </Button>
