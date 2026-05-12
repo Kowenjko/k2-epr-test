@@ -10,7 +10,7 @@ Full-stack модуль для обліку клієнтів, товарів і 
 | Database | PostgreSQL 16 |
 | Frontend | Nuxt 4, Vue 3, TypeScript, Pinia, Tailwind CSS 4, shadcn-vue |
 | Tests | pytest, pytest-asyncio, SQLite in-memory |
-| DevOps | Docker Compose, Dockerfile для API і client |
+| DevOps | Docker Compose, Dockerfile для API і client, Makefile |
 
 ## Можливості
 
@@ -54,7 +54,7 @@ Full-stack модуль для обліку клієнтів, товарів і 
 ├── docker/
 │   ├── api/Dockerfile
 │   └── client/Dockerfile
-├── docker-compose.yml           # PostgreSQL + API
+├── docker-compose.yml           # PostgreSQL + API + client
 ├── Makefile
 └── README.md
 ```
@@ -84,55 +84,58 @@ Swagger доступний за адресою:
 http://localhost:8000/docs
 ```
 
-## Швидкий запуск
+## Швидкий запуск через Docker
 
-### 1. Підняти PostgreSQL і API
+### Варіант 1: повна інсталяція
 
 ```bash
-docker compose up --build
+make install
 ```
 
-Або через Makefile:
+Ця команда:
+
+- створює `api/.env` і `client/.env`, якщо їх ще немає;
+- збирає Docker images;
+- запускає контейнери у фоні;
+- застосовує Alembic міграції;
+- очищає і заповнює базу demo-даними.
+
+Після цього застосунок доступний тут:
+
+| Сервіс | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API | http://localhost:8000 |
+| Swagger | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432 |
+
+### Варіант 2: звичайний dev-запуск
 
 ```bash
 make dev
 ```
 
-Сервіси:
+Або напряму:
 
-| Сервіс | URL |
-|---|---|
-| API | http://localhost:8000 |
-| Swagger | http://localhost:8000/docs |
-| PostgreSQL | localhost:5432 |
+```bash
+docker compose up --build
+```
 
-### 2. Застосувати міграції
-
-В окремому терміналі:
+Після першого запуску застосуй міграції і, за потреби, заповни базу:
 
 ```bash
 make migrate
+make seed-reset
 ```
 
-### 3. Заповнити demo data
+Сервіси в Docker Compose:
 
-```bash
-docker compose exec api uv run python seed.py --reset
-```
-
-### 4. Запустити frontend локально
-
-```bash
-cd client
-yarn install
-yarn dev
-```
-
-Frontend буде доступний тут:
-
-```text
-http://localhost:3000
-```
+| Сервіс | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API | http://localhost:8000 |
+| Swagger | http://localhost:8000/docs |
+| PostgreSQL | localhost:5432 |
 
 ## Локальний запуск без Docker
 
@@ -183,6 +186,11 @@ NUXT_API_URL_SERVER=http://localhost:8000/api/
 Тести бекенду використовують SQLite in-memory, тому PostgreSQL для них не потрібен.
 
 ```bash
+make test
+```
+або локально
+
+```bash
 cd api
 uv run pytest -v
 ```
@@ -201,8 +209,10 @@ uv run pytest -v
 
 | Команда | Опис |
 |---|---|
+| `make install` | створити env-файли, зібрати images, підняти контейнери, виконати міграції і seed |
 | `make dev` | запустити Docker Compose з rebuild |
 | `make up` | запустити контейнери у фоні |
+| `make build` | зібрати Docker images |
 | `make down` | зупинити контейнери |
 | `make restart` | перезапустити контейнери |
 | `make logs` | дивитися логи |
@@ -210,6 +220,11 @@ uv run pytest -v
 | `make migrate` | застосувати Alembic міграції |
 | `make revision msg="..."` | створити нову autogenerate-міграцію |
 | `make downgrade` | відкотити останню міграцію |
+| `make seed` | додати demo-дані |
+| `make seed-reset` | очистити дані і заново заповнити demo-даними |
+| `make test` | запустити тести |
+| `make env-api` | створити `api/.env` з прикладу, якщо файла ще немає |
+| `make env-client` | створити `client/.env` з прикладу, якщо файла ще немає |
 
 ## Приклад створення замовлення
 

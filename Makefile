@@ -1,49 +1,38 @@
 SHELL := /bin/bash
 
-DEV_COMPOSE = docker compose
-API = $(DEV_COMPOSE) exec api
-CLIENT = $(DEV_COMPOSE) exec client
+API = docker compose exec api
+CLIENT = docker compose exec client
 
 
-# --------------------------
-# CLIENT COMMAND
-# --------------------------
-c.install:
-	@if [ -z "$(name)" ]; then \
-		echo "⚠️ Usage: make revision name=\"description\""; \
-		exit 1; \
-	fi
-	$(CLIENT) yarn add $(name) 
-
-# --------------------------
-# DEV COMMANDS
-# --------------------------
+#-----------------------------------------------------------
+# Docker
+#-----------------------------------------------------------
 
 dev:
-	$(DEV_COMPOSE) up --build
+	docker compose up --build
 
 down:
-	$(DEV_COMPOSE) down
+	docker compose down
 
 up:
-	$(DEV_COMPOSE) up -d
+	docker compose up -d
 
 res-dev: down dev
+
+build:
+	docker compose build
 
 restart: down up
 	
 logs:
-	$(DEV_COMPOSE) logs -f
+	docker compose logs -f
 
 ps:
-	$(DEV_COMPOSE) ps
+	docker compose ps
 
-install:
-	dev migrate c.install
-
-# --------------------------
-# DATABASE MIGRATIONS (ALEMBIC)
-# --------------------------
+#-----------------------------------------------------------
+# Database
+#-----------------------------------------------------------
 
 revision:
 	@if [ -z "$(msg)" ]; then \
@@ -58,4 +47,25 @@ migrate:
 downgrade:
 	$(API) uv run alembic downgrade -1
 
+seed:
+	$(API) uv run seed.py
+
+seed-reset:
+	$(API) uv run seed.py --reset
+
+# --------------------------
+# Test
+# --------------------------
+test:
+	$(API) uv run pytest -v
+
+# --------------------------
+# Installation
+# --------------------------
+env-api:
+	@test -f api/.env || cp api/.env.example api/.env
+env-client:
+	@test -f client/.env || cp client/.env.example client/.env
+
+install: env-api env-client build up migrate seed-reset
 
