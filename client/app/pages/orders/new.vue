@@ -61,7 +61,7 @@ const submit = async () => {
     <!-- Success state -->
     <div v-if="done" class="flex flex-col items-center space-y-4 py-20 text-center">
       <CheckCircle class="size-16 text-green-500" />
-      <h2 class="text-2xl font-bold">Замовлення #{{ createdOrderId }} створено!</h2>
+      <h2 class="text-2xl font-bold">Замовлення ID{{ createdOrderId }} створено!</h2>
       <p class="text-muted-foreground">Сума розрахована автоматично на основі обраних товарів.</p>
       <div class="mt-2 flex gap-3">
         <Button variant="outline" @click="router.push('/')">Переглянути замовлення</Button>

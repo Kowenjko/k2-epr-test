@@ -141,7 +141,7 @@ watch(selectedClientId, async () => await loadOrders())
                 </thead>
                 <tbody>
                   <tr v-for="item in order.items" :key="item.id" class="border-t border-border/50">
-                    <td class="py-1 pr-2">{{ item.product?.name ?? `#${item.product_id}` }}</td>
+                    <td class="py-1 pr-2">{{ item.product?.name ?? `ID${item.product_id}` }}</td>
                     <td class="py-1 text-right">{{ item.quantity }}</td>
                     <td class="py-1 text-right font-mono">{{ formatPrice(item.unit_price) }}</td>
                     <td class="py-1 text-right font-mono font-medium">{{ formatPrice(item.subtotal) }}</td>
